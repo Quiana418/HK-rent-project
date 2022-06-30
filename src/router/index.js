@@ -1,23 +1,39 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+
+// 引入父路由
+import Layout from '@/views/Layout'
+
+// 路由懒加载
+const Home = () => import('@/views/Home')
+const Information = () => import('@/views/Information')
+const FindHouse = () => import('@/views/FindHouse')
+const My = () => import('@/views/My')
+const Login = () => import('@/views/Login')
+const Register = () => import('@/views/Register')
+const Favorate = () => import('@/views/Favorate')
+const MyRent = () => import('@/views/MyRent')
+const CityList = () => import('@/views/CityList')
 
 Vue.use(VueRouter)
 
 const routes = [
   {
     path: '/',
-    name: 'home',
-    component: HomeView
+    component: Layout,
+    redirect: '/home',
+    children: [
+      { path: 'home', component: Home },
+      { path: 'information', component: Information },
+      { path: 'findhouse', component: FindHouse },
+      { path: 'my', component: My, name: 'my' }
+    ]
   },
-  {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-  }
+  { path: '/login', component: Login },
+  { path: '/register', component: Register },
+  { path: '/favorate', component: Favorate },
+  { path: '/myrent', component: MyRent },
+  { path: '/citylist', component: CityList }
 ]
 
 const router = new VueRouter({

@@ -1,0 +1,23 @@
+{
+  "id": "3480211",
+  "name": "黑马头条移动端",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "1089767",
+      "name": "三角",
+      "font_class": "sanjiao",
+      "unicode": "e65a",
+      "unicode_decimal": 58970
+    },
+    {
+      "icon_id": "1727598",
+      "name": "411地图",
+      "font_class": "ditu",
+      "unicode": "e906",
+      "unicode_decimal": 59654
+    }
+  ]
+}

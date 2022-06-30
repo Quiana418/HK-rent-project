@@ -1,12 +1,16 @@
 <template>
   <div>
-    <!-- 一级路由占位符 -->
-    <router-view></router-view>
+    <van-nav-bar class="banner" title="收藏列表">
+      <template #left>
+        <van-icon name="arrow-left" @click="$router.back()" />
+      </template>
+    </van-nav-bar>
   </div>
 </template>
 
 <script>
 export default {
+  name: 'Favorate',
   created () { },
   data () {
     return {}

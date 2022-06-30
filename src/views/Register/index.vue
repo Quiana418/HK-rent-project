@@ -1,12 +1,10 @@
 <template>
-  <div>
-    <!-- 一级路由占位符 -->
-    <router-view></router-view>
-  </div>
+  <div>注册</div>
 </template>
 
 <script>
 export default {
+  name: 'Register',
   created () { },
   data () {
     return {}
