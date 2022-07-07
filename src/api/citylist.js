@@ -17,3 +17,19 @@ export const hotCityList = () => {
     url: '/area/hot'
   })
 }
+
+// 在找房中请求城市信息
+export const cityList = (cityId) => {
+  return request({
+    method: 'GET',
+    url: `/houses?cityId=${cityId}`
+  })
+}
+
+// 查询房屋的具体信息 根据houseCode查询
+export const houseDetails = (id) => {
+  return request({
+    method: 'GET',
+    url: `/houses/${id}`
+  })
+}

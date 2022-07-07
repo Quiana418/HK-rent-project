@@ -11,7 +11,9 @@
 
     <!-- 顶部搜索框 -->
     <div class="search-box">
-      <span @click="$router.push('/citylist')">北京</span>
+      <span @click="$router.push('/citylist')">{{
+        currentCity.label || "北京"
+      }}</span>
       <i class="iconfont icon-arrow"></i>
       <img src="@/assets/fonts/triangle.png" alt="" />
       <span class="vertical-line"></span>
@@ -30,11 +32,12 @@
     <!-- 中间导航栏 -->
     <div class="middle-nav">
       <van-grid icon-size="60">
-        <van-grid-item>
+        <!-- 点击整租 合租 跳转到找房页面 -->
+        <van-grid-item @click="$router.push('/findHouse')">
           <img src="@/assets/fonts/nav-1.png" alt="" />
           <div class="text">整租</div>
         </van-grid-item>
-        <van-grid-item>
+        <van-grid-item @click="$router.push('/findHouse')">
           <img src="@/assets/fonts/nav-2.png" alt="" />
           <div class="text">合租</div>
         </van-grid-item>
@@ -42,7 +45,7 @@
           ><img src="@/assets/fonts/nav-3.png" alt="" />
           <div class="text">地图找房</div></van-grid-item
         >
-        <van-grid-item>
+        <van-grid-item @click="$router.push('/gorent')">
           <img src="@/assets/fonts/nav-4.png" alt="" />
           <div class="text">去出租</div>
         </van-grid-item>
@@ -77,6 +80,8 @@
 
 <script>
 import { SwiperPic, rentGroups } from '@/api/home'
+// import eventBus from '@/EventBus'
+import { mapState } from 'vuex'
 export default {
   name: 'Home',
   created () {
@@ -84,6 +89,14 @@ export default {
     this.getSwiperPic()
     // 调用请求租房小组数据的方法
     this.getRentGroups()
+
+    /*  // 接收方绑定 接收那边传过来的热门城市[]
+    eventBus.$on('myClick', (cities) => {
+      console.log(cities)
+      // const value = cities.value
+      const value = cities.some(item => console.log(item.value))
+      console.log(value)
+    }) */
   },
   data () {
     return {
@@ -104,7 +117,7 @@ export default {
     async getSwiperPic () {
       try {
         const res = await SwiperPic()
-        console.log(res)
+        // console.log(res)
         this.swiperPics = res.data.body
         // eslint-disable-next-line no-return-assign
         this.swiperPics.map(item => item.imgSrc = 'http://liufusong.top:8080' + item.imgSrc)
@@ -115,15 +128,19 @@ export default {
     // 请求租房小组数据
     async getRentGroups () {
       try {
-        const res = await rentGroups()
-        console.log(res)
+        const res = await rentGroups(this.currentCity.value)
+        // console.log(res)
         this.rentGroupList = res.data.body
+        // console.log(this.rentGroupList)
       } catch (err) {
         this.$toast('数据请求失败' + err)
       }
     }
   },
-  computed: {},
+  computed: {
+    // 获取
+    ...mapState(['currentCity'])
+  },
   watch: {},
   filters: {},
   components: {}

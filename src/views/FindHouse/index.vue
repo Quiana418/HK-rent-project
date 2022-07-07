@@ -2,8 +2,10 @@
   <div class="container">
     <!-- 顶部搜索框 -->
     <div class="search-box">
-      <van-icon name="arrow-left" class="triangle" />
-      <span @click="$router.push('/citylist')">北京</span>
+      <van-icon name="arrow-left" class="triangle" @click="$router.back()" />
+      <span @click="$router.push('/citylist')">{{
+        currentCity.label || "北京"
+      }}</span>
       <i class="iconfont icon-arrow"></i>
       <img src="@/assets/fonts/triangle.png" alt="" />
       <span class="vertical-line"></span>
@@ -38,49 +40,71 @@
           toolbar-position="bottom"
         />
       </van-dropdown-item>
+      <!--
       <van-dropdown-item title="筛选">
-        <van-picker show-toolbar :columns="columns" toolbar-position="bottom" />
+        <van-picker show-toolbar toolbar-position="bottom" />
+      </van-dropdown-item> -->
+
+      <van-dropdown-item title="筛选" class="last">
+        <van-picker toolbar-position="bottom" />
       </van-dropdown-item>
     </van-dropdown-menu>
 
-    <!-- 列表展示 -->
-    <div class="list">
-      <div class="img"></div>
-      <div class="message">
-        <h3>我是标题</h3>
-        <p class="describe">二室/100/西/南浦滨海花园</p>
-        <p class="position">近地铁</p>
-        <p class="price">
-          <span>1234</span>
-          <span>元/月</span>
-        </p>
-      </div>
-    </div>
+    <!-- 房屋列表展示 -->
+    <HouseList :cityList="cityList"></HouseList>
   </div>
 </template>
 
 <script>
+import HouseList from '@/components/HouseList.vue'
+import { cityList } from '@/api/citylist'
+import { mapState } from 'vuex'
 export default {
   name: 'FindHouse',
-  created () { },
+  created () {
+    // 调用请求 找房中的城市信息
+    this.getCityList()
+  },
   data () {
     return {
       columns: ['杭州', '宁波', '温州', '绍兴', '湖州', '嘉兴', '金华', '衢州'],
       columns1: ['不限', '整租', '合租'],
-      columns2: ['不限', '1000及以下', '1000-2000', '2000-3000', '3000-4000', '4000-5000', '5000-7000', '7000以上']
+      columns2: ['不限', '1000及以下', '1000-2000', '2000-3000', '3000-4000', '4000-5000', '5000-7000', '7000以上'],
+      show: false,
+      showPopover: false,
+      // 找房中请求回来的 每个城市对应的城市数据
+      cityList: []
     }
   },
-  methods: {},
-  computed: {},
+  methods: {
+    showPopup () {
+      this.show = true
+    },
+    // 请求 找房中的每个城市对应的城市信息
+    async getCityList () {
+      try {
+        const res = await cityList(this.currentCity.value)
+        console.log(res)
+        this.cityList = res.data.body.list
+      } catch (err) {
+        console.log('findHouse', err)
+      }
+    }
+
+  },
+  computed: {
+    ...mapState(['currentCity'])
+  },
   watch: {},
   filters: {},
-  components: {}
+  components: { HouseList }
 }
 </script>
 
 <style scoped lang='less'>
 .container {
   margin-top: 50px;
+  overflow: hidden;
 }
 .search-input {
   margin-left: -30px;
@@ -172,65 +196,20 @@ export default {
     height: 18px;
   }
 }
+.van-dropdown-menu {
+  width: 101%;
+}
 /deep/.van-popup {
   height: 300px !important;
 }
-.list {
-  display: flex;
-  padding: 10px 0 0;
-  width: 100%;
-  height: 120px;
-  margin-left: 10px;
-  border-bottom: 1px solid #e5e5e5;
-  .img {
-    width: 106px;
-    height: 80px;
-    background-color: green;
-    margin-top: 15px;
-  }
-  .message {
-    flex: 1;
-    padding: 0 0 0 12px;
-    line-height: 10px;
-    h3 {
-      font-size: 16px;
-    }
-    .describe {
-      font-size: 13px;
-      color: #afb2b3;
-    }
-    .position {
-      width: 46px;
-      height: 20px;
-      margin-top: -5px;
-      text-align: center;
-      border-radius: 3px;
-      line-height: 20px;
-      background: #e1f5f8;
-      font-size: 13px;
-      color: #39becd;
-    }
-    /deep/.price {
-      margin: -3px;
-      & span:nth-child(1) {
-        font-size: 16px;
-        color: #fa5741;
-        font-weight: 800;
-      }
-      & span:nth-child(2) {
-        font-size: 12px;
-        color: #fa5741;
-      }
-    }
-  }
-}
+
 /deep/.van-picker__toolbar {
-  height: 50px;
+  height: 1.8rem;
   background-color: #fff;
   font-size: 18px !important;
   line-height: 60px;
   text-align: center;
-  margin-top: -15px;
+  margin-top: -0.7rem;
   border-top: 1px solid #e3e3e3;
   .van-picker__cancel {
     color: #21b97a;
@@ -248,6 +227,30 @@ export default {
   }
   /deep/.van-picker-column {
     width: 254px !important;
+  }
+}
+/deep/.van-dropdown-menu__bar--opened {
+  z-index: 10 !important;
+}
+/deep/.van-dropdown-menu {
+  .last {
+    .van-dropdown-item__content {
+      position: absolute !important;
+      top: 0;
+      left: 1.99rem !important;
+      width: 80% !important;
+      height: 100% !important;
+      max-height: unset;
+    }
+    // .van-picker {
+    //   height: 667px !important;
+    //   position: absolute;
+    //   top: 0;
+    // }
+    .van-dropdown-item--down {
+      position: fixed !important;
+      top: 0px !important;
+    }
   }
 }
 </style>

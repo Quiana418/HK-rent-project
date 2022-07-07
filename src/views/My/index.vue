@@ -26,8 +26,8 @@
     </div>
 
     <van-grid class="my-grid" :border="true" column-num="3" clickable>
-      <van-grid-item icon="like-o" text="我的收藏" to="/favorate"/>
-      <van-grid-item icon="wap-home-o" text="我的出租" to="/myrent"/>
+      <van-grid-item icon="like-o" text="我的收藏" to="/favorate" />
+      <van-grid-item icon="wap-home-o" text="我的出租" to="/myrent" />
       <van-grid-item icon="clock-o" text="看房记录" />
       <van-grid-item icon="notes-o" text="成为房主" />
       <van-grid-item icon="user-o" text="个人资料" />
@@ -65,7 +65,8 @@ export default {
     // 请求用户信息
     async getUserInfos () {
       try {
-        const res = await getUserInfo(this.user.token)
+        // console.log(this.user.token)
+        const res = await getUserInfo()
         console.log(res)
         this.userInfo = res.data.body
       } catch (err) {
@@ -74,6 +75,7 @@ export default {
     }
   },
   computed: {
+    // 获取
     ...mapState(['user'])
   },
   watch: {},

@@ -14,14 +14,18 @@
         :key="index"
         :sticky="false"
       >
+        <!-- 通过右侧 对应左侧 -->
         <van-index-anchor :index="val">{{
           val === "#" ? "当前城市" : val === "热" ? "热门城市" : val
         }}</van-index-anchor>
 
+        <!-- 遍历ABCD字母  点击字母 对应上文字-->
+        <!-- 点击热门城市名 跳转到首页 并把当前点击的热门城市名 传给home页面 eventBus -->
         <van-cell
           v-for="(item, index) in cityList[val]"
           :key="index"
           :title="item.label"
+          @click="handleClick(item)"
         />
       </div>
     </van-index-bar>
@@ -30,7 +34,7 @@
 
 <script>
 import { hotCityList, getCityList } from '@/api/citylist'
-
+// import eventBus from '@/EventBus'
 export default {
   name: 'CityList',
   created () {
@@ -55,7 +59,7 @@ export default {
     async getCityLists () {
       try {
         const res = await getCityList(this.level)
-        console.log(res)
+        // console.log(res)
         // this.cityList = res.data.body
         // 声明一个对象 存储左侧的索引字母 {A:[{},{}] , B[{},{}]}
         const FirstLetterList = {}
@@ -72,7 +76,7 @@ export default {
             FirstLetterList[FirstLetter] = [item]
           }
         })
-        console.log(FirstLetterList)
+        // console.log(FirstLetterList)
         this.cityList = { ...this.cityList, ...FirstLetterList }
         // 获取到FirstLetterList里面的所有属性A,B,C,,,,,并排序
         const cityListIndex = Object.keys(FirstLetterList).sort()
@@ -92,7 +96,23 @@ export default {
       } catch (err) {
         console.log('CityList' + err)
       }
+    },
+    // eventBus
+    handleClick (item) {
+      /*   // 传值方触发 把当前城市的热门城市[]传过去
+        eventBus.$emit('myClick', item)
+        // console.log(this.cityList) */
+      // 判断如果该点击的城市是热门城市 那么将该城市存到vuex里并跳转
+      if (this.hotCityList.indexOf(item) !== -1) {
+        this.$store.commit('saveCity', item)
+        this.$router.back()
+      } else {
+        this.$toast('暂无房源')
+      }
+      // console.log(this.hotCityList.indexOf(item))
+      // 登录成功后 把用户登录信息通过vuex存储
     }
+
   },
   computed: {},
   watch: {},

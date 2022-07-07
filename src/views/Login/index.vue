@@ -56,7 +56,7 @@ export default {
       try {
         console.log('submit', values)
         const res = await Login(values)
-        console.log(res)
+        console.log(res.data.body)
         // console.log(res.data.body)
         // 登录成功后 把用户登录信息通过vuex存储
         this.$store.commit('setUser', res.data.body)

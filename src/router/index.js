@@ -14,6 +14,9 @@ const Register = () => import('@/views/Register')
 const Favorate = () => import('@/views/Favorate')
 const MyRent = () => import('@/views/MyRent')
 const CityList = () => import('@/views/CityList')
+const HouseDetails = () => import('@/views/HouseDetails')
+const GoRent = () => import('@/views/GoRent')
+const RentSearch = () => import('@/views/RentSearch')
 
 Vue.use(VueRouter)
 
@@ -33,7 +36,10 @@ const routes = [
   { path: '/register', component: Register },
   { path: '/favorate', component: Favorate },
   { path: '/myrent', component: MyRent },
-  { path: '/citylist', component: CityList }
+  { path: '/citylist', component: CityList },
+  { path: '/houseDetails/:id', component: HouseDetails, name: 'houseDetails', props: true },
+  { path: '/gorent', component: GoRent, name: 'gorent' },
+  { path: '/rentsearch', component: RentSearch }
 ]
 
 const router = new VueRouter({

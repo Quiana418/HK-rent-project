@@ -12,12 +12,12 @@ export const Login = (data) => {
 }
 
 // 请求用户的登录信息
-export const getUserInfo = (token) => {
+export const getUserInfo = () => {
   return request({
     method: 'GET',
-    url: 'user',
-    headers: {
-      authorization: token
-    }
+    url: 'user'
+    // headers: {
+    //   authorization: token
+    // }
   })
 }

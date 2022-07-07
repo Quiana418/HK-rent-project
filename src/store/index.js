@@ -11,13 +11,28 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    user: {}
+    user: {},
+    // 存储当前点击的城市名
+    currentCity: {},
+    // 存储搜索建议
+    searchSuggestList: []
   },
   getters: {
   },
   mutations: {
     setUser (state, payload) {
       state.user = payload
+    },
+    // 当前点击的城市
+    saveCity (state, payload) {
+      state.currentCity = payload
+    },
+    // 搜索建议
+    searchSuggestList (state, payload) {
+      let arr = state.searchSuggestList
+      arr.unshift(payload)
+      arr = [...new Set(arr)]
+      state.searchSuggestList = arr
     }
   },
   actions: {
