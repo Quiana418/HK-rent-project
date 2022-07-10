@@ -54,6 +54,10 @@ export default {
   methods: {
     async onSubmit (values) {
       try {
+        this.$toast.loading({
+          message: '加载中...',
+          forbidClick: true
+        })
         console.log('submit', values)
         const res = await Login(values)
         console.log(res.data.body)

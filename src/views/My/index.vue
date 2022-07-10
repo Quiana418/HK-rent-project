@@ -26,7 +26,7 @@
     </div>
 
     <van-grid class="my-grid" :border="true" column-num="3" clickable>
-      <van-grid-item icon="like-o" text="我的收藏" to="/favorate" />
+      <van-grid-item icon="like-o" text="我的收藏" to="/favorite" />
       <van-grid-item icon="wap-home-o" text="我的出租" to="/myrent" />
       <van-grid-item icon="clock-o" text="看房记录" />
       <van-grid-item icon="notes-o" text="成为房主" />

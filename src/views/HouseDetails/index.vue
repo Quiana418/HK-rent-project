@@ -49,7 +49,7 @@
     </div>
 
     <!-- 地图 -->
-    <div class="map"></div>
+    <div class="map" id="map"></div>
 
     <!-- 房屋配套 -->
     <div class="furniture">
@@ -101,8 +101,11 @@
 
     <!-- 底部 -->
     <div class="footer">
-      <div class="collect">
-        <van-icon name="star-o" />
+      <div class="collect" @click="collect">
+        <van-icon
+          :name="isCollected === true ? 'star' : 'star-o'"
+          :class="{ active: isCollected === true }"
+        />
         <span>收藏</span>
       </div>
       <div class="consult">在线咨询</div>
@@ -112,8 +115,35 @@
 </template>
 
 <script>
+import { isHouseCollected, addCollectHouse, delCollectHouse } from '@/api/favorites'
 import HouseList from '@/components/HouseList.vue'
 import { houseDetails } from '@/api/citylist'
+import { mapState } from 'vuex'
+// 地图
+const { BMapGL } = window
+const labelStyle = {
+  position: 'absolute',
+  zIndex: -7982820,
+  backgroundColor: 'rgb(238, 93, 91)',
+  color: 'rgb(255, 255, 255)',
+  height: 25,
+  padding: '5px 10px',
+  lineHeight: '14px',
+  borderRadius: 3,
+  boxShadow: 'rgb(204, 204, 204) 2px 2px 2px',
+  whiteSpace: 'nowrap',
+  fontSize: '12px',
+  userSelect: 'none'
+}
+const mapArrow = `
+  background: url(http://map.baidu.com/fwmap/upload/r/map/fwmap/static/house/images/label.png) no-repeat;
+  position: absolute;
+  width: 11px;
+  height: 10px;
+  top: 23px;
+  left: 10px;
+  overflow: hidden
+`
 export default {
   name: 'HouseDetails',
   // 路由传参
@@ -126,9 +156,13 @@ export default {
   created () {
     // 请求查询房屋的具体信息
     this.getHouseDetails()
+    // 判断房屋是否被收藏
+    this.isHouseCollected()
   },
   data () {
     return {
+      // 是否点击了收藏  请求数据回来
+      isCollected: null,
       // 房屋详情
       houseList: {},
       recommendHouses: [
@@ -166,14 +200,87 @@ export default {
       try {
         // 路由传参
         const res = await houseDetails(this.id)
-        console.log(res)
+        // console.log(res)
         this.houseList = res.data.body
+        this.renderMap(res.data.body.community, res.data.body.coord)
+        console.log(this.houseList)
       } catch (err) {
         console.log('findHouse', err)
       }
+    },
+    // 判断房屋是否收藏 发请求
+    async isHouseCollected () {
+      try {
+        const res = await isHouseCollected(this.id)
+        // console.log(res)
+        this.isCollected = res.data.body.isFavorite
+        // console.log(this.isCollected)
+      } catch (err) {
+        console.log(err)
+      }
+    },
+    // 点击收藏 发起请求
+    async collect () {
+      // 判断是否登录
+      if (this.user.token) {
+        try {
+          // 如果点击了收藏 那么请求取消收藏
+          if (this.isCollected) {
+            // const res = await addCollect(this.houseList.houseCode)
+            await delCollectHouse(this.id)
+
+            // console.log(res)
+            // 点击了收藏
+            this.isCollected = !this.isCollected
+          } else {
+            // 否则添加收藏
+            await addCollectHouse(this.id)
+            this.isCollected = !this.isCollected
+          }
+        } catch (err) {
+          console.log(err)
+        }
+      } else {
+        // 如果未登录，跳转到登录页面
+        this.$dialog.confirm({
+          title: '好客租房',
+          message: '您还未登录，是否跳转到登录页面？',
+          confirmButtonColor: '#108ee9'
+        })
+          .then(() => {
+            this.$router.push('/login')
+          })
+          .catch(() => {
+            // on cancel
+          })
+      }
+    },
+    // 地图
+    renderMap (community, coord) {
+      console.log(community)
+      const { latitude, longitude } = coord
+
+      const map = new BMapGL.Map('map')
+      const point = new BMapGL.Point(longitude, latitude)
+      map.centerAndZoom(point, 17)
+
+      const label = new BMapGL.Label('', {
+        position: point,
+        offset: new BMapGL.Size(0, -36)
+      })
+
+      label.setStyle(labelStyle)
+      label.setContent(`
+        <span>${community}</span>
+        <div style="${mapArrow}"></div>
+      `)
+      map.addOverlay(label)
     }
   },
-  computed: {},
+  computed: {
+    // 取token
+    ...mapState(['user'])
+  },
   watch: {},
   filters: {},
   components: {
@@ -191,7 +298,7 @@ export default {
 .pic {
   width: 100%;
   height: 252px;
-  background-color: pink;
+  background-color: #fff;
   img {
     width: 100%;
     height: 100%;
@@ -288,7 +395,7 @@ export default {
 .map {
   width: 100%;
   height: 145px;
-  background-color: lightblue;
+  background-color: #fff;
 }
 .furniture {
   padding: 0 10px;
@@ -426,6 +533,9 @@ export default {
   }
   .consult {
     flex: 1;
+  }
+  .active {
+    color: red;
   }
 }
 </style>

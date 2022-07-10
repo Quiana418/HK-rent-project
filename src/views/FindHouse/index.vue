@@ -29,14 +29,16 @@
       <van-dropdown-item title="方式">
         <van-picker
           show-toolbar
-          :columns="columns1"
+          :columns="rentTypeList"
+          value-key="label"
           toolbar-position="bottom"
         />
       </van-dropdown-item>
       <van-dropdown-item title="租金">
         <van-picker
           show-toolbar
-          :columns="columns2"
+          :columns="rentPriceList"
+          value-key="label"
           toolbar-position="bottom"
         />
       </van-dropdown-item>
@@ -56,24 +58,37 @@
 </template>
 
 <script>
+import { getHousesQueryCondition } from '@/api/houses'
 import HouseList from '@/components/HouseList.vue'
 import { cityList } from '@/api/citylist'
 import { mapState } from 'vuex'
 export default {
   name: 'FindHouse',
-  created () {
+  // 获取房屋查询条件
+  async created () {
     // 调用请求 找房中的城市信息
     this.getCityList()
+    try {
+      const res = await getHousesQueryCondition(this.currentCity.value)
+      console.log(res)
+      this.rentTypeList = res.data.body.rentType
+      this.rentPriceList = res.data.body.price
+    } catch (err) {
+      console.log(err)
+    }
   },
   data () {
     return {
       columns: ['杭州', '宁波', '温州', '绍兴', '湖州', '嘉兴', '金华', '衢州'],
-      columns1: ['不限', '整租', '合租'],
-      columns2: ['不限', '1000及以下', '1000-2000', '2000-3000', '3000-4000', '4000-5000', '5000-7000', '7000以上'],
+      // rentType
+      rentTypeList: [],
+      // 租金
+      rentPriceList: [],
       show: false,
       showPopover: false,
       // 找房中请求回来的 每个城市对应的城市数据
       cityList: []
+
     }
   },
   methods: {
@@ -84,8 +99,9 @@ export default {
     async getCityList () {
       try {
         const res = await cityList(this.currentCity.value)
-        console.log(res)
+        // console.log(res)
         this.cityList = res.data.body.list
+        // console.log(this.cityList)
       } catch (err) {
         console.log('findHouse', err)
       }

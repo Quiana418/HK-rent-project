@@ -139,6 +139,10 @@
       <button class="cancel">取消</button>
       <button type="file" class="submit" @click="publishHouse">提交</button>
     </div>
+    <!-- 加载中 -->
+    <van-loading size="24px" vertical v-if="isLoadingShow"
+      >加载中...</van-loading
+    >
   </div>
 </template>
 
@@ -150,9 +154,9 @@ export default {
     // 获取选中的 房屋数据
     try {
       const res = await getHouseDetails()
-      console.log(res)
+      // console.log(res)
       this.houseDetails = res.data.body
-      console.log(this.houseDetails)
+      // console.log(this.houseDetails)
     } catch (e) {
       console.log(e)
     }
@@ -177,6 +181,7 @@ export default {
       // 接收路由参数
       housing: this.$route.params.housing,
       fileList: [],
+      isLoadingShow: false,
       // 发布房源需要传的参数
       dataObj: {
         title: '',
@@ -194,7 +199,7 @@ export default {
   },
   methods: {
     onConfirm (value) {
-      // console.log(value)
+      console.log(value)
       this.value = value.label
       this.dataObj.roomType = value.value
       this.showPicker = false
@@ -229,17 +234,36 @@ export default {
     // 点击 发布房源
     async publishHouse () {
       try {
+        this.$toast.loading({
+          message: '加载中...',
+          forbidClick: true
+        })
         const houseImg = this.houseImage.join('|')
         const res = await publishHouse({
           ...this.dataObj, houseImg
-
         })
-        console.log(res)
-        // const houseImageStr = this.houseImage.join('|')
-        // console.log(houseImageStr)
-        // this.houseImage = houseImageStr
-      } catch (e) {
-        console.log(e)
+        if (res.status === 200) {
+          this.$dialog.confirm({
+            title: '提示',
+            message: '发布房源成功',
+            confirmButtonText: '继续发布',
+            cancelButtonText: '去查看',
+            confirmButtonColor: '#108ee9'
+          })
+            .then(() => {
+              // on confirm
+              // 点击弹出框里面继续发布房源
+              // this.$router.push({ name: 'gorent' })
+              this.$router.back()
+            })
+            .catch(() => {
+              // on cancel
+              // 点击去查看  跳转到找房页面
+              this.$router.push('/findhouse')
+            })
+        }
+      } catch (err) {
+        this.$toast.fail('发布失败，请重试' + err)
       }
     },
     // 加载图片

@@ -11,12 +11,13 @@ const FindHouse = () => import('@/views/FindHouse')
 const My = () => import('@/views/My')
 const Login = () => import('@/views/Login')
 const Register = () => import('@/views/Register')
-const Favorate = () => import('@/views/Favorate')
+const Favorite = () => import('@/views/Favorite')
 const MyRent = () => import('@/views/MyRent')
 const CityList = () => import('@/views/CityList')
 const HouseDetails = () => import('@/views/HouseDetails')
 const GoRent = () => import('@/views/GoRent')
 const RentSearch = () => import('@/views/RentSearch')
+const BaiDuMap = () => import('@/views/BaiDuMap')
 
 Vue.use(VueRouter)
 
@@ -34,12 +35,13 @@ const routes = [
   },
   { path: '/login', component: Login },
   { path: '/register', component: Register },
-  { path: '/favorate', component: Favorate },
+  { path: '/favorite', component: Favorite },
   { path: '/myrent', component: MyRent },
   { path: '/citylist', component: CityList },
   { path: '/houseDetails/:id', component: HouseDetails, name: 'houseDetails', props: true },
   { path: '/gorent', component: GoRent, name: 'gorent' },
-  { path: '/rentsearch', component: RentSearch }
+  { path: '/rentsearch', component: RentSearch },
+  { path: '/map', component: BaiDuMap }
 ]
 
 const router = new VueRouter({
