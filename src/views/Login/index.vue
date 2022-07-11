@@ -61,6 +61,10 @@ export default {
         console.log('submit', values)
         const res = await Login(values)
         console.log(res.data.body)
+        this.$toast.success({
+          message: '数据加载成功',
+          duration: 5000
+        })
         // console.log(res.data.body)
         // 登录成功后 把用户登录信息通过vuex存储
         this.$store.commit('setUser', res.data.body)

@@ -22,35 +22,68 @@
     </div>
 
     <!-- 顶部导航 -->
-    <van-dropdown-menu>
-      <van-dropdown-item title="区域">
-        <van-picker show-toolbar :columns="columns" toolbar-position="bottom" />
-      </van-dropdown-item>
-      <van-dropdown-item title="方式">
-        <van-picker
-          show-toolbar
-          :columns="rentTypeList"
-          value-key="label"
-          toolbar-position="bottom"
-        />
-      </van-dropdown-item>
-      <van-dropdown-item title="租金">
-        <van-picker
-          show-toolbar
-          :columns="rentPriceList"
-          value-key="label"
-          toolbar-position="bottom"
-        />
-      </van-dropdown-item>
-      <!--
-      <van-dropdown-item title="筛选">
-        <van-picker show-toolbar toolbar-position="bottom" />
-      </van-dropdown-item> -->
+    <van-sticky>
+      <van-dropdown-menu>
+        <van-dropdown-item title="区域">
+          <van-picker :columns="areaList" value-key="label" />
+          <van-row>
+            <van-col span="8">
+              <van-button block>取消</van-button>
+            </van-col>
+            <van-col span="16">
+              <van-button type="primary" block>确定</van-button>
+            </van-col>
+          </van-row>
+        </van-dropdown-item>
+        <van-dropdown-item title="方式" ref="rentType1">
+          <van-picker
+            ref="rentType"
+            :columns="rentTypeList"
+            value-key="label"
+            @change="getColumnValue"
+          />
+          <van-row>
+            <van-col span="8">
+              <van-button block @click="$refs.rentType1.toggle()"
+                >取消</van-button
+              >
+            </van-col>
+            <van-col span="16">
+              <van-button type="primary" block @click="getColumnValue"
+                >确定</van-button
+              >
+            </van-col>
+          </van-row>
+        </van-dropdown-item>
+        <van-dropdown-item title="租金" ref="rentPrice1">
+          <van-picker
+            :columns="rentPriceList"
+            value-key="label"
+            @change="getColumnValue1"
+          />
+          <van-row>
+            <van-col span="8">
+              <van-button block @click="$refs.rentPrice1.toggle()"
+                >取消</van-button
+              >
+            </van-col>
+            <van-col span="16">
+              <van-button type="primary" block @click="getColumnValue1"
+                >确定</van-button
+              >
+            </van-col>
+          </van-row>
+        </van-dropdown-item>
 
-      <van-dropdown-item title="筛选" class="last">
-        <van-picker toolbar-position="bottom" />
-      </van-dropdown-item>
-    </van-dropdown-menu>
+        <van-dropdown-item title="筛选" @open="flag = true">
+        </van-dropdown-item>
+      </van-dropdown-menu>
+    </van-sticky>
+    <van-popup
+      position="right"
+      style="height: 100%; width: 70%"
+      v-model="flag"
+    ></van-popup>
 
     <!-- 房屋列表展示 -->
     <HouseList :cityList="cityList"></HouseList>
@@ -58,7 +91,7 @@
 </template>
 
 <script>
-import { getHousesQueryCondition } from '@/api/houses'
+import { getHousesQueryCondition, queryHouses } from '@/api/houses'
 import HouseList from '@/components/HouseList.vue'
 import { cityList } from '@/api/citylist'
 import { mapState } from 'vuex'
@@ -70,9 +103,14 @@ export default {
     this.getCityList()
     try {
       const res = await getHousesQueryCondition(this.currentCity.value)
-      console.log(res)
+      // console.log(res)
       this.rentTypeList = res.data.body.rentType
       this.rentPriceList = res.data.body.price
+      // 区域内的数据 需要进行处理
+      // 级联选择的数据嵌套深度需要保持一致，如果部分选项没有子选项，可以使用空字符串进行占位
+      res.data.body.area.children[0].children = [{ label: '' }]
+      res.data.body.subway.children[0].children = [{ label: '' }]
+      this.areaList = [res.data.body.area, res.data.body.subway]
     } catch (err) {
       console.log(err)
     }
@@ -80,14 +118,31 @@ export default {
   data () {
     return {
       columns: ['杭州', '宁波', '温州', '绍兴', '湖州', '嘉兴', '金华', '衢州'],
-      // rentType
+      // rentType 查询条件
       rentTypeList: [],
-      // 租金
+      // 租金查询条件
       rentPriceList: [],
+      // 区域数据
+      areaList: [],
+      // 控制弹层
       show: false,
       showPopover: false,
       // 找房中请求回来的 每个城市对应的城市数据
-      cityList: []
+      cityList: [],
+      // 控制筛选弹出层是否弹出
+      flag: false,
+      // 请求传参数据
+      dataObj:
+      {
+        rentType: '',
+        price: '',
+        area: '',
+        subway: '',
+        roomType: '',
+        oriented: '',
+        characteristic: '',
+        floor: ''
+      }
 
     }
   },
@@ -105,6 +160,41 @@ export default {
       } catch (err) {
         console.log('findHouse', err)
       }
+    },
+    // 根据条件（合租方式）查询房屋
+    // rentType: this.dataObj.rentType
+    async renderHouseList () {
+      try {
+        const res = await queryHouses({
+          start: 1,
+          end: 20,
+          cityId: this.currentCity.value,
+          ...this.dataObj
+        })
+        // console.log(res)
+        this.cityList = res.data.body.list
+      } catch (err) {
+        console.log(err)
+      }
+    },
+
+    // 获取对应列中选中的值---方式
+    // 根据 方式 查询房屋
+    getColumnValue (ref, value) {
+      // value是当前列中选中的值
+      // console.log(value)
+      this.$refs.rentType1.toggle()
+      this.dataObj.rentType = value.value
+      this.housesList = []
+      this.renderHouseList()
+    },
+    // 根据 房租 查询房屋
+    // 获取对应列中选中的值---租金
+    getColumnValue1 (ref, value) {
+      this.$refs.rentPrice1.toggle()
+      this.dataObj.price = value.value
+      this.housesList = []
+      this.renderHouseList()
     }
 
   },
@@ -212,11 +302,14 @@ export default {
     height: 18px;
   }
 }
-.van-dropdown-menu {
+/deep/.van-dropdown-menu {
   width: 101%;
 }
-/deep/.van-popup {
-  height: 300px !important;
+.van-popup {
+  height: 300px;
+}
+/deep/.van-dropdown-menu__bar {
+  height: 55px !important;
 }
 
 /deep/.van-picker__toolbar {
@@ -248,7 +341,7 @@ export default {
 /deep/.van-dropdown-menu__bar--opened {
   z-index: 10 !important;
 }
-/deep/.van-dropdown-menu {
+/* /deep/.van-dropdown-menu {
   .last {
     .van-dropdown-item__content {
       position: absolute !important;
@@ -268,5 +361,5 @@ export default {
       top: 0px !important;
     }
   }
-}
+} */
 </style>
